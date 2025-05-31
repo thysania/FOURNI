@@ -1,43 +1,26 @@
-Sub GenerateReceipts()
-    Dim wsData As Worksheet, wsReceipt As Worksheet
+Sub PrintReceiptsFromColumns()
+    Dim wsReceipt As Worksheet, wsData As Worksheet
     Dim lastRow As Long, i As Long
-    Dim receiptRow As Long
-    Dim clientName As String, unitID As String
-    Dim address As String, amount As Currency, dueDate As String
-    
-    Set wsData = ThisWorkbook.Sheets("Monthly Rent")
-    Set wsReceipt = ThisWorkbook.Sheets("Receipt")
-    
+
+    Set wsReceipt = ThisWorkbook.Sheets("RECPT")
+    Set wsData = ThisWorkbook.Sheets("Monthly Rent") ' Adjust if your data sheet is named differently
+
+    ' Assumes data starts from row 2 (row 1 is headers)
     lastRow = wsData.Cells(wsData.Rows.Count, "A").End(xlUp).Row
-    
+
     Application.ScreenUpdating = False
-    
-    For i = 2 To lastRow ' Assuming headers in row 1
-        If wsData.Cells(i, "F").Value <> "Y" Then ' Unpaid only
-            ' Get data
-            clientName = wsData.Cells(i, "A").Value
-            unitID = wsData.Cells(i, "B").Value
-            address = wsData.Cells(i, "C").Value
-            amount = wsData.Cells(i, "D").Value
-            dueDate = wsData.Cells(i, "E").Value
-            
-            ' Fill the receipt template
-            wsReceipt.Range("ClientName").Value = clientName
-            wsReceipt.Range("Unit").Value = unitID
-            wsReceipt.Range("Address").Value = address
-            wsReceipt.Range("Amount").Value = amount
-            wsReceipt.Range("Due").Value = dueDate
-            
-            ' Optional: Print or Save PDF
-            ' wsReceipt.ExportAsFixedFormat Type:=xlTypePDF, Filename:= _
-            '     ThisWorkbook.Path & "\Receipt_" & clientName & "_" & unitID & ".pdf"
-            ' wsReceipt.PrintOut
-            
-            ' Optional: mark as paid
-            ' wsData.Cells(i, "F").Value = "Y"
-        End If
+
+    For i = 2 To lastRow
+        ' Write current row's values into the fixed positions
+        wsReceipt.Range("B22").Value = wsData.Cells(i, 2).Value  ' MOIS (column B)
+        wsReceipt.Range("B6").Value = Date                       ' Today()
+        wsReceipt.Range("F7").Value = wsData.Cells(i, 3).Value   ' MT (column C)
+        wsReceipt.Range("D14").Value = wsData.Cells(i, 1).Value  ' LOCATAIRE (column A)
+
+        ' Print the filled receipt
+        wsReceipt.PrintOut ' Or use ExportAsFixedFormat to save as PDF
     Next i
-    
+
     Application.ScreenUpdating = True
-    MsgBox "Receipts generated!"
+    MsgBox "All receipts printed!"
 End Sub
