@@ -1,26 +1,23 @@
-Sub PrintReceiptsFromColumns()
+Sub PreviewOneReceipt()
     Dim wsReceipt As Worksheet, wsData As Worksheet
-    Dim lastRow As Long, i As Long
+    Dim selectedRow As Variant
 
     Set wsReceipt = ThisWorkbook.Sheets("RECPT")
-    Set wsData = ThisWorkbook.Sheets("Monthly Rent") ' Adjust if your data sheet is named differently
+    Set wsData = ThisWorkbook.Sheets("RENT")
 
-    ' Assumes data starts from row 2 (row 1 is headers)
-    lastRow = wsData.Cells(wsData.Rows.Count, "A").End(xlUp).Row
+    selectedRow = Application.InputBox("Enter row number to preview:", Type:=1)
+    If selectedRow = False Then Exit Sub
+    If selectedRow < 2 Or selectedRow > wsData.Cells(wsData.Rows.Count, "A").End(xlUp).Row Then
+        MsgBox "Invalid row selected."
+        Exit Sub
+    End If
 
-    Application.ScreenUpdating = False
+    ' Fill in receipt
+    wsReceipt.Range("B22").Value = wsData.Cells(selectedRow, 2).Value ' MOIS
+    wsReceipt.Range("B6").Value = Date
+    wsReceipt.Range("F7").Value = wsData.Cells(selectedRow, 3).Value ' MT
+    wsReceipt.Range("D14").Value = wsData.Cells(selectedRow, 1).Value ' LOCATAIRE
 
-    For i = 2 To lastRow
-        ' Write current row's values into the fixed positions
-        wsReceipt.Range("B22").Value = wsData.Cells(i, 2).Value  ' MOIS (column B)
-        wsReceipt.Range("B6").Value = Date                       ' Today()
-        wsReceipt.Range("F7").Value = wsData.Cells(i, 3).Value   ' MT (column C)
-        wsReceipt.Range("D14").Value = wsData.Cells(i, 1).Value  ' LOCATAIRE (column A)
-
-        ' Print the filled receipt
-        wsReceipt.PrintOut ' Or use ExportAsFixedFormat to save as PDF
-    Next i
-
-    Application.ScreenUpdating = True
-    MsgBox "All receipts printed!"
+    ' Show Excel's built-in print preview for this receipt
+    wsReceipt.PrintPreview
 End Sub
