@@ -1,26 +1,20 @@
-import os
-from tkinter import Tk, Label, Button
-from PIL import ImageTk
+import tkinter as tk
+from PIL import ImageTk, Image
 from pdf2image import convert_from_path
-import win32printing
-import subprocess
 
-pdf_file = "recu_06_2025.pdf"
+# Convert PDF to image
+pages = convert_from_path("recu_06_2025.pdf", dpi=150)
+image = pages[0]
 
-# Convert first page of PDF to image for preview
-pages = convert_from_path(pdf_file, dpi=150)
-img = ImageTk.PhotoImage(pages[0])
-
-# Print using win32printing (via Adobe Reader or system PDF viewer)
-def print_pdf():
-    printer = win32printing.get_default_printer()
-    subprocess.Popen(['AcroRd32.exe', '/t', pdf_file, printer, '', ''], shell=True)
-
-# GUI
-root = Tk()
+# Create Tkinter root window BEFORE PhotoImage
+root = tk.Tk()
 root.title("Receipt Preview")
 
-Label(root, image=img).pack()
-Button(root, text="Print Receipt", command=print_pdf).pack(pady=10)
+# Convert to Tkinter-compatible image
+tk_image = ImageTk.PhotoImage(image)
+
+# Display it
+label = tk.Label(root, image=tk_image)
+label.pack()
 
 root.mainloop()
