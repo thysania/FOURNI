@@ -1,0 +1,29 @@
+import os
+from tkinter import Tk, Label, Button
+from PIL import ImageTk
+from pdf2image import convert_from_path
+import win32print
+import win32api
+
+# Settings
+pdf_file = "recu_06_2025.pdf"  # Change this dynamically later if needed
+
+# Convert PDF to image
+pages = convert_from_path(pdf_file, dpi=150)
+img = ImageTk.PhotoImage(pages[0])  # Show first page only
+
+# Print function
+def print_pdf():
+    printer = win32print.GetDefaultPrinter()
+    win32api.ShellExecute(
+        0, "printto", pdf_file, f'"{printer}"', ".", 0
+    )
+
+# GUI
+root = Tk()
+root.title("Receipt Preview")
+
+Label(root, image=img).pack()
+Button(root, text="Print Receipt", command=print_pdf).pack(pady=10)
+
+root.mainloop()
