@@ -10,18 +10,14 @@ def print_preview_image(pil_image):
     hprinter = win32ui.CreateDC()
     hprinter.CreatePrinterDC(printer_name)
 
-    # Start the print job
     hprinter.StartDoc("Reçu")
     hprinter.StartPage()
 
-    # Get printable area (HORZRES, VERTRES)
     printable_area = hprinter.GetDeviceCaps(8), hprinter.GetDeviceCaps(10)
 
-    # Resize image to fit page
     img = pil_image.copy()
     img = img.resize(printable_area, Image.LANCZOS)
 
-    # Send image to printer
     dib = ImageWin.Dib(img)
     dib.draw(hprinter.GetHandleOutput(), (0, 0, printable_area[0], printable_area[1]))
 
@@ -29,26 +25,32 @@ def print_preview_image(pil_image):
     hprinter.EndDoc()
     hprinter.DeleteDC()
 
-# === GUI & Preview ===
-
-# Convert PDF to image
+# === Load PDF and Convert to Image ===
 pages = convert_from_path("recu_06_2025.pdf", dpi=150)
 image = pages[0]
 
-# Create Tkinter window
+# Keep the high-res image for printing
+image_for_printing = image.copy()
+
+# Resize preview image for display (e.g., width: 700 px max)
+max_width = 700
+w_percent = (max_width / float(image.width))
+preview_height = int((float(image.height) * float(w_percent)))
+preview_image = image.resize((max_width, preview_height), Image.LANCZOS)
+
+# === GUI ===
 root = tk.Tk()
-root.title("Receipt Preview")
+root.title("Aperçu du reçu")
 
 # Convert to Tkinter-compatible image
-tk_image = ImageTk.PhotoImage(image)
+tk_image = ImageTk.PhotoImage(preview_image)
 
-# Display the image
+# Display image
 label = tk.Label(root, image=tk_image)
 label.pack(pady=10)
 
-# Add Print button
-print_button = tk.Button(root, text="Imprimer", command=lambda: print_preview_image(image))
+# Print button
+print_button = tk.Button(root, text="Imprimer", command=lambda: print_preview_image(image_for_printing))
 print_button.pack(pady=10)
 
-# Run the app
 root.mainloop()
